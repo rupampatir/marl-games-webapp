@@ -29,7 +29,7 @@ def get_hash(board):
 
 def chooseAction_QTable(current_board, start_player):
         policy = None
-        if (start_player=='1'):
+        if (start_player=='2'):
             print('computer starts')
             policy = policy_1
         else:
