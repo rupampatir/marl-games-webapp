@@ -13,7 +13,7 @@ const state = () => ({
   const actions = {
     getBestAction(context, payload) {
       return new Promise((resolve, reject) => {
-        this.$axios.get('/get_tic_tac_toe_action/', {params:payload}).then(
+        this.$axios.post('/get_tic_tac_toe_action/', payload).then(
           (response) => {
               console.log(response)
               resolve(response.action)

@@ -4,6 +4,8 @@ import numpy as np
 import random as random
 import pickle
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
 
 
 policy_1_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'policy_Q_1_both')
@@ -29,11 +31,9 @@ def get_hash(board):
 
 def chooseAction_QTable(current_board, start_player):
         policy = None
-        if (start_player=='2'):
-            print('computer starts')
+        if (start_player==2):
             policy = policy_1
         else:
-            print('human starts')
             policy = policy_2
         exp_rate = 0.3
         positions = get_available_squares(current_board)
@@ -57,12 +57,10 @@ def chooseAction_QTable(current_board, start_player):
         
 
 # our result page view
+@csrf_exempt
 def get_tic_tac_toe_action(request):
-    print(request)
-    observation = request.GET.get('board')
-    start_player = request.GET.get('start_player')
-    observation = observation[1:-1]
-    parsed = [-1 if ob=='2' else int(ob) for ob in observation]
-    optimalAction = chooseAction_QTable(np.array(parsed).reshape((3,3)), start_player)
-    print(optimalAction)
+    data = json.loads(request.body)
+    board = data['board']
+    start_player = data['start_player']
+    optimalAction = chooseAction_QTable(np.array(board), start_player)
     return JsonResponse({"action":optimalAction}, safe=False)
