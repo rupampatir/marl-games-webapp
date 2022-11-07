@@ -41,7 +41,7 @@ class Menu():
       else:
         # print("ai")
         player_1 = Player("Computer", exp_rate=0, player_number=1)
-        player_1.loadPolicy("policy_Q_1_both")
+        player_1.loadPolicy("policy_Q_1")
         player_2 = HumanPlayer("Human", player_number=-1)
 
       st = Board(player_1, player_2, 1, self.game_mode)

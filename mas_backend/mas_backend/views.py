@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 
 
-policy_1_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'policy_Q_1_both')
+policy_1_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'policy_Q_1')
 policy_1 = pickle.load(open(policy_1_path, "rb"))
 policy_2_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'policy_Q_2_both')
 policy_2 = pickle.load(open(policy_2_path, "rb"))

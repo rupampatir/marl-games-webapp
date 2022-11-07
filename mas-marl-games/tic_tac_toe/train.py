@@ -57,88 +57,90 @@ def get_plot(plot_data, algo):
 # player_2.savePolicy()
 
 
-### Q LEARNING (FIRST MOVE) ###
+## Q LEARNING (FIRST MOVE) ###
 
-# win_rate = 0
-# win_rates = []
+win_rate = 0
+win_rates = []
 
-# for episodes in [1000,2000,5000,10000,15000,20000]:
-#     player_1 = Player("Q_1", player_number=1)
-#     player_2 = Player("random", player_number=-1)
+for episodes in [2000,5000,10000,15000,20000]:
+    player_1 = Player("Q_1", player_number=1)
+    player_2 = Player("random", player_number=-1)
 
-#     st = Board(player_1, player_2, 1, "Q")
-#     print("training...")
-#     plot_data = st.train_RL(episodes, 'first')
+    st = Board(player_1, player_2, 1, "Q")
+    print("training...")
+    plot_data = st.train_RL(episodes, 'first')
 
-#     get_plot(plot_data, "DQN Player 1")
+    get_plot(plot_data, "DQN Player 1")
 
-#     y = list(np.array(plot_data)[:,1])
+    y = list(np.array(plot_data)[:,1])
 
-#     print("Player 1: " + str(len(y)) + " Episodes")
-#     print("Win rate", 1.0*y.count(1)/len(y))
-#     print("Draw rate", 1.0*y.count(0)/len(y))
-#     print("Lose rate", 1.0*y.count(-1)/len(y))
-#     win_rates.append([episodes, 1.0*y.count(1)/len(y)])
-#     if (1.0*y.count(1)/len(y)>win_rate):
-#         player_1.savePolicy()
+    print("Player 1: " + str(len(y)) + " Episodes")
+    print("Win rate", 1.0*y.count(1)/len(y))
+    print("Draw rate", 1.0*y.count(0)/len(y))
+    print("Lose rate", 1.0*y.count(-1)/len(y))
+    win_rates.append([episodes, 1.0*y.count(1)/len(y)])
+    if (1.0*y.count(1)/len(y)>win_rate):
+        player_1.savePolicy()
+        win_rate = 1.0*y.count(1)/len(y)
 
-# win_rates = np.array(win_rates)
-# print
-# x = win_rates[:,0]
-# y = win_rates[:,1]
-# plt.figure(figure_count)
-# plt.plot(x,y)
-# plt.ylabel('Rate')
-# plt.xlabel('Number of episodes during Training')
-# plt.xticks(x)
-# plt.title("Player 1: Win Rate vs Training Episodes")
-# plt.savefig("Player 1: Win Rate vs Training Episodes")
-# figure_count+=1
+win_rates = np.array(win_rates)
+print
+x = win_rates[:,0]
+y = win_rates[:,1]
+plt.figure(figure_count)
+plt.plot(x,y)
+plt.ylabel('Rate')
+plt.xlabel('Number of episodes during Training')
+plt.xticks(x)
+plt.title("Player 1: Win Rate vs Training Episodes")
+plt.savefig("Player 1: Win Rate vs Training Episodes")
+figure_count+=1
 
-# print(x)
-# print(y)
+print(x)
+print(y)
 
-# ### Q LEARNING (OPPONENT) ###
+### Q LEARNING (OPPONENT) ###
 
 
-# win_rate = 0
-# win_rates = []
+win_rate = 0
+win_rates = []
 
-# for episodes in [5000,10000,15000,20000, 25000, 30000]:
+for episodes in [10000,15000,20000, 25000, 30000]:
     
-#     player_1 = Player("random", player_number=1)
-#     player_2 = Player("Q_2", player_number=-1)
+    player_1 = Player("random", player_number=1)
+    player_2 = Player("Q_2", player_number=-1)
 
-#     st = Board(player_1, player_2, 1, "Q")
-#     print("training...")
-#     plot_data = st.train_RL(episodes, 'opponent')
+    st = Board(player_1, player_2, 1, "Q")
+    print("training...")
+    plot_data = st.train_RL(episodes, 'opponent')
 
-#     get_plot(plot_data, "DQN Player 2")
+    get_plot(plot_data, "DQN Player 2")
 
-#     y = list(np.array(plot_data)[:,1])
+    y = list(np.array(plot_data)[:,1])
 
-#     print("Player 2: " + str(len(y)) + " Episodes")
-#     print("Win rate", 1.0*y.count(1)/len(y))
-#     print("Draw rate", 1.0*y.count(0)/len(y))
-#     print("Lose rate", 1.0*y.count(-1)/len(y))
-#     win_rates.append([episodes, 1.0*y.count(1)/len(y)])
-#     if (1.0*y.count(1)/len(y)>win_rate):
-#         player_2.savePolicy()
+    print("Player 2: " + str(len(y)) + " Episodes")
+    print("Win rate", 1.0*y.count(-1)/len(y))
+    print("Draw rate", 1.0*y.count(0)/len(y))
+    print("Lose rate", 1.0*y.count(1)/len(y))
+    win_rates.append([episodes, 1.0*y.count(1)/len(y)])
+    if (1.0*y.count(-1)/len(y)>win_rate):
+        player_2.savePolicy()
+        win_rate = 1.0*y.count(-1)/len(y)
 
-# win_rates = np.array(win_rates)
-# x = win_rates[:,0]
-# y = win_rates[:,1]
-# plt.figure(figure_count)
-# plt.plot(x,y)
-# plt.ylabel('Rate')
-# plt.xlabel('Number of episodes during Training')
-# plt.xticks(x)
-# plt.title("Player 2: Win Rate vs Training Episodes")
-# plt.savefig("Player 2: Win Rate vs Training Episodes")
-# figure_count+=1
+win_rates = np.array(win_rates)
+x = win_rates[:,0]
+y = win_rates[:,1]
+plt.figure(figure_count)
+plt.plot(x,y)
+plt.ylabel('Rate')
+plt.xlabel('Number of episodes during Training')
+plt.xticks(x)
+plt.title("Player 2: Win Rate vs Training Episodes")
+plt.savefig("Player 2: Win Rate vs Training Episodes")
+figure_count+=1
 
-# print(x)
-# print(y)
+print(x)
+print(y)
 # [ 5000. 10000. 15000. 20000. 25000. 30000.]
 # [0.3876     0.3191     0.3106     0.2632     0.30052    0.26936667]
 
