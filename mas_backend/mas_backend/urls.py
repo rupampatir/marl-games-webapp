@@ -20,8 +20,11 @@ from mas_backend import views
 urlpatterns = [
     path("admin/", admin.site.urls),
 
-    path('', views.home, name='home'),
+    # path('', views.home, name='home'),
     path('get_tic_tac_toe_action/', views.get_tic_tac_toe_action, name='get_tic_tac_toe_action'),
+    path('get_pong_action/', views.get_pong_action, name='get_pong_action'),
+    path('get_connect_4_action/', views.get_connect_4_action, name='get_connect_4_action'),
+
 ]
 
 

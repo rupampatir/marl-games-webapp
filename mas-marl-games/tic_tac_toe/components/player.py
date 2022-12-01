@@ -92,7 +92,7 @@ class Player:
                   Q[state_hash][(r,c)] = np.random.rand()
       return Q
     
-    def updateQTable(self, reward, alpha = 0.5, gamma = 0.9):
+    def updateQTable(self, reward, alpha = 0.25, gamma = 0.8):
         state, action, newState, newAction = self.states[-1], self.actions[-1], self.states[-2],self.actions[-2],
         if (newState==None or newAction==None):
           self.Q[state][action]+= alpha*(reward - self.Q[state][action])

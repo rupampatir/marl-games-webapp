@@ -51,7 +51,7 @@ export default {
       currentPlayer: 1,
       gameOver: false,
       gameOverText: '',
-      start_player: 0
+      start_player: 0,
     }
   },
   computed: {

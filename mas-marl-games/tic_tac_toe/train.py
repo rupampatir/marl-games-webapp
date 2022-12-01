@@ -62,7 +62,7 @@ def get_plot(plot_data, algo):
 win_rate = 0
 win_rates = []
 
-for episodes in [2000,5000,10000,15000,20000]:
+for episodes in [100000]:
     player_1 = Player("Q_1", player_number=1)
     player_2 = Player("random", player_number=-1)
 
@@ -105,7 +105,7 @@ print(y)
 win_rate = 0
 win_rates = []
 
-for episodes in [10000,15000,20000, 25000, 30000]:
+for episodes in [100000]:
     
     player_1 = Player("random", player_number=1)
     player_2 = Player("Q_2", player_number=-1)
@@ -151,7 +151,7 @@ win_rates_1 = []
 win_rate_2 = 0
 win_rates_2 = []
 
-for episodes in [1000,2000,5000,10000,15000,20000]:
+for episodes in [100000]:
     player_1 = Player("Q_1_both", player_number=1)
     player_2 = Player("Q_2_both", player_number=-1)
     player_2.loadPolicy("policy_Q_1")

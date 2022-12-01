@@ -8,8 +8,8 @@
       </v-card>
 
       
-      <v-layout pt-9>
-        <v-card class="pa-4" color="white" max-width="300" hover>
+      <v-layout pt-9 class="mx-n4">
+        <v-card class="pa-4 mx-4" color="white" max-width="300" hover>
           <v-card-title class="headline">
           </v-card-title>
           <v-img class="mb-6" contain max-height="150" src="tic-tac-toe.png" />
@@ -19,6 +19,22 @@
               block
               color="orange"
               to="/tictactoe"
+              nuxt
+            >
+              Play
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+        <v-card class="pa-4 mx-4" color="white" max-width="300" hover>
+          <v-card-title class="headline">
+          </v-card-title>
+          <v-img class="mb-6" contain max-height="150" src="connect-4.png" />
+          <v-card-actions >
+            <v-btn
+              
+              block
+              color="orange"
+              to="/connect4"
               nuxt
             >
               Play
