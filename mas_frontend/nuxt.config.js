@@ -50,7 +50,7 @@ export default {
   ],
 
   axios: {
-    baseURL: "http://54.234.234.226:8080", // process.env.baseUrl //'http://backoffice-be-staging.getpodium.in/',
+    baseURL: "http://127.0.0.1:8000/", // process.env.baseUrl //'http://backoffice-be-staging.getpodium.in/',
   },
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins

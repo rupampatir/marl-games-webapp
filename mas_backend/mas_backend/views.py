@@ -9,6 +9,9 @@ import json
 import cv2
 import torch
 import math
+from tensorflow.keras.optimizers import Adam # - Works
+from keras.models import Sequential
+from keras.layers.core import Dense, Dropout
 
 ## TIC TAC TOE
 policy_1_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'policy_Q_1')
@@ -106,9 +109,9 @@ class DQN(nn.Module):
         return self.fc(conv_out)
 
 # PING PONG
-net = DQN((4,84,84), 6).to("cpu")
-DEFAULT_ENV_NAME = "./PongNoFrameskip-v4"
-net.load_state_dict(torch.load(os.path.join(os.path.dirname(os.path.realpath(__file__)), DEFAULT_ENV_NAME + "-best.dat"), map_location=torch.device('cpu')))
+# net = DQN((4,84,84), 6).to("cpu")
+# DEFAULT_ENV_NAME = "./PongNoFrameskip-v4"
+# net.load_state_dict(torch.load(os.path.join(os.path.dirname(os.path.realpath(__file__)), DEFAULT_ENV_NAME + "-best.dat"), map_location=torch.device('cpu')))
 
 
 def process_pong_frame(observations):
@@ -165,7 +168,7 @@ def drop_piece(board, row, col, piece):
     board[row][col] = piece
 
 def is_valid_location(board, col):
-	return board[ROW_COUNT-1][col] == 0
+    return board[ROW_COUNT-1][col] == 0
 
 def get_next_open_row(board, col):
 	for r in range(ROW_COUNT):
@@ -328,3 +331,313 @@ def get_connect_4_action(request):
             winner = AI_PIECE
 
         return JsonResponse({"action":optimalAction,"winner":winner}, safe=False)
+
+### Snake
+
+import numpy as np
+# from keras.optimizers import Adam
+# from keras.models import Sequential
+# from keras.layers.core import Dense, Dropout
+import random
+# from random import randint
+# import matplotlib.pyplot as plt
+# import seaborn as sns
+import os
+
+class Food(object):
+
+    def __init__(self, game):
+        self.x_food, self.y_food = 0, 0
+        self.food_coord(game)
+
+    def food_coord(self, game):
+        self.x_food, self.y_food = game.find_free_space()
+
+class Player(object):
+
+    def __init__(self, game, color="green"):
+        self.color = color
+        if self.color == "red":
+            x = 0.3 * game.game_width
+            y = 0.3 * game.game_height
+            self.player_number = 1
+        if self.color == "blue":
+            x = 0.3 * game.game_width
+            y = 0.7 * game.game_height
+            self.player_number = 2
+        self.x = x - x % 20
+        self.y = y - y % 20
+        self.position = []  # coordinates of all the parts of the snake
+        self.position.append([self.x, self.y])  # append the head
+        self.food = 1  # length
+        self.eaten = False
+        self.right = 0
+        self.left = 1
+        self.up = 2
+        self.down = 3
+        self.direction = self.right
+        self.step_size = 20  # pixels per step
+        self.crash = False
+        self.score = 0
+        self.record = 0
+        self.deaths = 0
+        self.total_score = 0  # accumulated score
+        self.agent = None
+        
+    def init_player(self, game):
+        self.x, self.y = game.find_free_space()
+        self.position = []
+        self.position.append([self.x, self.y])
+        self.food = 1
+        self.eaten = False
+        self.direction = self.right
+        self.step_size = 20
+        self.crash = False
+        self.score = 0
+
+    def update_position(self):
+        if self.position[-1][0] != self.x or self.position[-1][1] != self.y:
+            if self.food > 1:
+                for i in range(0, self.food - 1):
+                    self.position[i][0], self.position[i][1] = self.position[i + 1]
+            self.position[-1][0] = self.x
+            self.position[-1][1] = self.y
+
+    def eat(self, game):
+        for food in game.food:
+            if self.x == food.x_food and self.y == food.y_food:
+                food.food_coord(game)
+                self.eaten = True
+                self.score += 1
+                self.total_score += 1
+
+    def crushed(self, game, x=-1, y=-1):
+        if x == -1 and y == -1:  # coordinates of the head
+            x = self.x
+            y = self.y
+        if x < 20 or x > game.game_width - 40 \
+                or y < 20 or y > game.game_height - 40:
+            return True
+        for player in game.player:
+            if [x, y] in player.position:
+                return True
+
+    def do_move(self, move, game):
+        if self.eaten:
+            self.position.append([self.x, self.y])
+            self.eaten = False
+            self.food = self.food + 1
+
+        move_array = [0, 0]
+
+        if move == self.right:
+            move_array = [self.step_size, 0]
+        elif move == self.left:
+            move_array = [-self.step_size, 0]
+        elif move == self.up:
+            move_array = [0, -self.step_size]
+        elif move == self.down:
+            move_array = [0, self.step_size]
+
+        if move == self.right and self.direction != self.left:
+            move_array = [self.step_size, 0]
+            self.direction = self.right
+        elif move == self.left and self.direction != self.right:
+            move_array = [-self.step_size, 0]
+            self.direction = self.left
+        elif move == self.up and self.direction != self.down:
+            move_array = [0, -self.step_size]
+            self.direction = self.up
+        elif move == self.down and self.direction != self.up:
+            move_array = [0, self.step_size]
+            self.direction = self.down
+        self.x += move_array[0]
+        self.y += move_array[1]
+
+        if self.crushed(game):
+            self.crash = True
+            self.deaths += 1
+            if self.score > self.record:
+                self.record = self.score
+
+        self.eat(game)
+        self.update_position()
+   
+    def select_move(self, game):
+        distance = []
+        for food in game.food:
+            distance.append(abs(self.x - food.x_food) + abs(self.y - food.y_food))
+        food = game.food[np.argmin(distance)]
+        state = self.agent.get_state(game, self, food)
+        prediction = self.agent.model.predict(state)
+        move = np.argmax(prediction[0])
+        return move
+	
+    def set_agent(self, agent):
+        self.agent = agent
+
+class Game:
+
+    def __init__(self, width=20, height=20, game_speed=30):
+        self.game_width = width * 20 + 40
+        self.game_height = height * 20 + 40
+        self.width = width
+        self.height = height
+        self.player = []
+        self.food = []
+        self.game_speed = game_speed
+
+    # return the coordinates of a location without snakes' parts or walls
+    def find_free_space(self):
+        x_rand = random.randint(20, self.game_width - 40)
+        x = x_rand - x_rand % 20
+        y_rand = random.randint(20, self.game_height - 40)
+        y = y_rand - y_rand % 20
+        for player in self.player:
+            if [x, y] not in player.position:
+                return x, y
+            else:
+                return self.find_free_space()
+	
+    def get_board_state(self):
+        board = [[0 for i in range(20)] for j in range(20)]
+        for player in self.player:
+            print(player.position)
+            for x, y  in player.position:
+                print(x,y)
+                x = int(x/20)
+                y = int(y/20)
+                board[x][y] = player.player_number
+        print(self.food)
+        for food in self.food:
+            x = int(food.x_food/20)
+            y = int(food.y_food/20)
+            board[x][y] = -1
+        
+        return board
+
+    def get_player_scores(self):
+        scores = []
+        for player in self.player:
+            scores.append(player.score)
+        return scores
+
+
+
+class DQNAgent(object):
+
+    def __init__(self, weights=False, dim_state=12, gamma=0.9, learning_rate=0.0005):
+        self.dim_state = dim_state
+        self.reward = 0
+        self.gamma = gamma
+        self.learning_rate = learning_rate
+        self.model = self.network()
+        if weights:
+            self.model = self.network(weights)
+        self.memory = []
+        self.name = "dqn"
+
+    def get_state(self, game, player, food):
+
+        game_matrix = np.zeros(shape=(game.width+2, game.height+2))
+        for p in game.player:
+            for i, coord in enumerate(p.position):
+                game_matrix[int(coord[1]/game.width), int(coord[0]/game.height)] = 1
+        for food in game.food:
+            game_matrix[int(food.y_food/game.width), int(food.x_food/game.height)] = 2
+        for i in range(game.width+2):
+            for j in range(game.height+2):
+                if i == 0 or j == 0 or i == game.width+1 or j == game.height+1:
+                    game_matrix[i, j] = 1
+        head = player.position[-1]
+        player_x, player_y = int(head[0]/game.width), int(head[1]/game.height)
+
+        #print(game_matrix)
+
+        state = [
+            player_x + 1 < game.width+2 and game_matrix[player_y, player_x+1] == 1,  # danger right
+            player_x + -1 >= 0 and game_matrix[player_y, player_x-1] == 1,  # danger left
+            player_y + -1 >= 0 and game_matrix[player_y-1, player_x] == 1,  # danger up
+            player_y + 1 < game.height+2 and game_matrix[player_y+1, player_x] == 1,  # danger down
+            player.direction == player.right,
+            player.direction == player.left,
+            player.direction == player.up,
+            player.direction == player.down,
+            food.x_food < player.x,  # food left
+            food.x_food > player.x,  # food right
+            food.y_food < player.y,  # food up
+            food.y_food > player.y  # food down
+            ]
+
+        for i in range(len(state)):
+            if state[i]:
+                state[i] = 1
+            else:
+                state[i] = 0
+
+        return np.asarray(state).reshape(1, self.dim_state)
+
+    def set_reward(self, player):
+        self.reward = 0
+        if player.crash:
+            self.reward = -10
+            return self.reward
+        if player.eaten:
+            self.reward = 10
+        return self.reward
+
+    def network(self, weights=None):
+        model = Sequential()
+        model.add(Dense(120, activation='relu', input_dim=self.dim_state))
+        model.add(Dropout(0.15))
+        model.add(Dense(120, activation='relu'))
+        model.add(Dropout(0.15))
+        model.add(Dense(120, activation='relu'))
+        model.add(Dropout(0.15))
+        model.add(Dense(4, activation='softmax'))  # [right, left, up, down]
+        opt = Adam(self.learning_rate)
+        model.compile(loss='mse', optimizer=opt)
+
+        if weights:
+            model.load_weights(weights)
+        return model
+
+
+
+snake_game = None
+@csrf_exempt
+def reset_snake_game(request):
+    global snake_game
+    snake_game = Game(20, 20)
+    snake_blu = Player(snake_game, "blue")
+    policy_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'SNAKE_300.hdf5')
+    rl_agent = DQNAgent(policy_path)
+    snake_blu.set_agent(rl_agent)
+    snake_game.player.append(snake_blu)
+
+    snake_red = Player(snake_game, "red")
+    snake_game.player.append(snake_red)
+    snake_game.food.append(Food(snake_game))
+	# snake_game.
+    snake_game.game_speed = 0
+
+    return JsonResponse({"board":snake_game.get_board_state(), "scores": snake_game.get_player_scores() }, safe=False) 
+
+
+@csrf_exempt
+def get_snake_action(request):
+    global snake_game
+
+    data = json.loads(request.body)
+    player_move = np.array(data['action'])
+    for player in snake_game.player:
+        if (player.player_number == 1):
+            player.do_move(player_move, snake_game)
+        else:
+            ai_move = player.select_move(snake_game)
+            player.do_move(ai_move, snake_game)
+        if player.crash:
+            player.init_player(snake_game)
+
+    return JsonResponse({"board":snake_game.get_board_state(), "scores": snake_game.get_player_scores() }, safe=False)
+    

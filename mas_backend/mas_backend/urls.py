@@ -25,6 +25,8 @@ urlpatterns = [
     path('get_pong_action/', views.get_pong_action, name='get_pong_action'),
     path('get_connect_4_action/', views.get_connect_4_action, name='get_connect_4_action'),
 
+    path('reset_snake_game/', views.reset_snake_game, name='reset_snake_game'),
+    path('get_snake_action/', views.get_snake_action, name='get_snake_action'),
 ]
 
 
