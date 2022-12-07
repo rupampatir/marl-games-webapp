@@ -1,5 +1,3 @@
-# Forked from https:#github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On
-
 from copy import copy
 from lib import wrappers
 from lib import dqn_model
@@ -22,7 +20,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from tensorboardX import SummaryWriter
-# Forked from https:#github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On
 import cv2
 import math
 
