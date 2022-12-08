@@ -13,7 +13,7 @@
           <v-layout  
             @mouseover="onMouseHover(j)"
             @mouseleave="onMouseHover(-1)" 
-            @click="performMove(j)" :class="`cell ${hover==j?'hover':''}`">
+            @click="performMove(j)" :class="`cell ${hover==j?'hover':'invalid-hover'}`">
             <div :class="`${board[5-i][j] == 0 ? 'white-chip' : ''} ${board[5-i][j] == -1 ? 'blue-chip' : ''} ${board[5-i][j] == 1 ? 'red-chip' : ''}`">
             </div>
           </v-layout>
@@ -177,14 +177,17 @@ export default {
   -webkit-transform: scale(1.01);
           transform: scale(1.01);
 }
+.cell.invalid-hover {
+  cursor: not-allowed;
+}
 .blue-chip {
   height: 50px;
   width: 50px;
   border: solid black 2px;
   background-color: rgb(21, 0, 181);
   border-radius: 50%;
-  top: 10%;
-  left: 10%;
+  margin: auto;
+
   display: inline-block;
   z-index: 3;
 }
@@ -195,8 +198,8 @@ export default {
   border: solid black 2px;
   background-color: rgb(181, 0, 0);
   border-radius: 50%;
-  top: 10%;
-  left: 10%;
+  margin: auto;
+
   display: inline-block;
   z-index: 3;
 }
@@ -206,9 +209,8 @@ export default {
   width: 50px;
   border: solid black 2px;
   background-color: white;
+  margin: auto;
   border-radius: 50%;
-  top: 10%;
-  left: 10%;
   display: inline-block;
   z-index: 3;
 }

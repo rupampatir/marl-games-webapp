@@ -171,7 +171,7 @@ export default {
   cursor: pointer;
   /* width:1000px; */
   position: relative;
-  border: solid 3px #1F1F1F;
+  border: solid 3px red;
   border-radius: 5px;
   background-color: #FFFF8F;
   -webkit-transition: 0.2s;
@@ -179,8 +179,9 @@ export default {
 }
 
 .cell:hover {
-  -webkit-transform: scale(1.05);
-          transform: scale(1.05);
+  background-color: #ffae00;
+  -webkit-transform: scale(1.01);
+          transform: scale(1.01);
 }
 
 .cross {

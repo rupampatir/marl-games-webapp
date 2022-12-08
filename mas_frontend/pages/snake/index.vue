@@ -1,18 +1,50 @@
 <template>
     <div class="tictactoe-board game-window">
-      <v-card class="pa-6" color="secondary" width="100%">
-        <v-layout column justify-center align-center>
-          <h2 class="white--text">  Score   </h2>
-          <v-layout :style="`width:100%;`" justify-space-around>
-            <h1 :style="`color: rgb(21, 0, 181);`"> YOU: {{ scores[1] }}</h1>
-            <h1 :style="`color: rgb(181, 0, 0);`"> {{ scores[0] }} :AI</h1>
-
+      <v-card class="d-flex justify-space-between pa-6" color="secondary" width="100%">
+        <v-flex xs9>
+          <v-layout column justify-center align-center>
+            <h1 class="black--text">  SCORE   </h1>
+            <v-layout :style="`width:100%;`" justify-space-around>
+              <h1 :style="`color: rgb(21, 0, 181);`"> You: {{ scores[1] }}</h1>
+              <h1 :style="`color: rgb(181, 0, 0);`"> {{ scores[0] }} :AI</h1>
+            </v-layout>
           </v-layout>
+        </v-flex>
+        <v-flex xs3>
 
-        </v-layout>
-        <v-btn color="black" block @click="startGame">
-              Start/Restart
-        </v-btn>
+          <v-layout column v-if="started">
+            <v-btn v-if="paused" color="black" block @click="continueGame">
+                Resume 
+            </v-btn>
+            <v-btn v-else color="black"  @click="pauseGame">
+                Pause 
+            </v-btn>
+            <v-btn class="mt-2"  color="black"  @click="stopGame">
+                Restart
+            </v-btn>
+          </v-layout>
+         
+          <v-card color="black" class="pa-4" v-else> 
+            <v-layout column>
+            <v-btn color="green"  @click="startGame">
+                 <span class="black--text"> Start</span>
+            </v-btn>
+            <v-select
+                class="mt-2" 
+                item-color="white"
+                color="white"
+                v-model="selectedNumberOfFood"
+                :hint="`Number of apples`"
+                :items="[1,2,3,4]"
+                persistent-hint
+                outlined
+                dense
+                label="Number of apples"
+                single-line
+              ></v-select>
+          </v-layout>
+          </v-card>
+        </v-flex>
       </v-card>
   
       <v-card flat class="snakeborder my-5 mx-auto">
@@ -36,7 +68,10 @@
         hover: -1,
         board: [],
         scores: 0,
-        lastMovePerformed: 3
+        pause: true,
+        started: false,
+        lastMovePerformed: 3,
+        selectedNumberOfFood: 1
       }
     },
     computed: {
@@ -91,14 +126,33 @@
       onMouseHover(col) {
         if (this.currentPlayer==this.PLAYER_PIECE && this.is_valid_location(col)) this.hover = col
       },
+  
       startGame() {
-        this.$store.dispatch('snake/resetGame').then((res) => {
+        this.started = true
+        this.paused = false
+        let payload = {
+            "num_food": this.selectedNumberOfFood
+        }
+        this.$store.dispatch('snake/resetGame', payload).then((res) => {
             this.board = res.board
             this.scores = res.scores
             setTimeout(()=>this.runGame(),100)
         })
       },
+      pauseGame() {
+        this.paused = true
+        this.$forceUpdate()
+      },
+      continueGame() {
+        this.paused = false
+        this.runGame()
+      },
+      stopGame() {
+        this.started = false
+        this.paused = true
+      },
       runGame() {
+        if (this.paused) return
         let payload = {
             "action": this.lastMovePerformed
         }

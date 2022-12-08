@@ -518,6 +518,11 @@ class Game:
             scores.append(player.score)
         return scores
 
+    def closest_food(self, player):
+        distance = []
+        for food in self.food:
+            distance.append(abs(player.x - food.x_food) + abs(player.y - food.y_food))
+        return np.argmin(distance)
 
 
 class DQNAgent(object):
@@ -549,7 +554,7 @@ class DQNAgent(object):
         player_x, player_y = int(head[0]/game.width), int(head[1]/game.height)
 
         #print(game_matrix)
-
+        food = game.food[game.closest_food(player)]
         state = [
             player_x + 1 < game.width+2 and game_matrix[player_y, player_x+1] == 1,  # danger right
             player_x + -1 >= 0 and game_matrix[player_y, player_x-1] == 1,  # danger left
@@ -613,7 +618,12 @@ def reset_snake_game(request):
 
     snake_red = Player(snake_game, "red")
     snake_game.player.append(snake_red)
-    snake_game.food.append(Food(snake_game))
+
+    data = json.loads(request.body)
+    num_food = data['num_food']
+    for _ in range(num_food):
+        snake_game.food.append(Food(snake_game))
+    
     snake_game.game_speed = 0
 
     return JsonResponse({"board":snake_game.get_board_state(), "scores": snake_game.get_player_scores() }, safe=False) 
