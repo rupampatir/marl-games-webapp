@@ -42,8 +42,8 @@
         player_1_position: 96,
         player_2_position: 96,    
         ball_position: [96,80],
-        ball_direction_x: -4,
-        ball_direction_y: 4,
+        ball_direction_x: -2,
+        ball_direction_y: 2,
         gameOver: false,
         gameOverText: '',
         lastFourFrames: [],
@@ -61,19 +61,24 @@
             else if (e.code === "ArrowDown") this.player_1_position += 10
         });
         this.resetGame()
-
+        // this.renderFrame()
+        // this.renderFrame()
+        // this.renderFrame()
         setInterval(() => {
             this.renderFrame()
 
             }, 0)
     },
     methods: {
+      randomChoice(arr) {
+          return arr[Math.floor(arr.length * Math.random())];
+      },
         resetGame() {
             this.player_1_position = 96;
             this.player_2_position = 96;    
             this.ball_position = [96,80];
-            this.ball_direction_x = -4;
-            this.ball_direction_y = 4;
+            this.ball_direction_x = this.randomChoice([-2,2]);
+            this.ball_direction_y = this.randomChoice([-2,2]);
             this.lastFourFrames = []
         },
       renderFrame() {
@@ -160,6 +165,12 @@
             if (ball_x>player1Offset && ball_x<=paddle_left) {
                 this.ball_direction_x=this.ball_direction_x*-1
                 console.log('switvh')
+                // var relativeIntersectY = (paddle1Y+(PADDLEHEIGHT/2)) - intersectY;
+
+
+
+
+
             }
         }
 
@@ -186,33 +197,32 @@
             this.resetGame()
 
         }
-        if (this.lastFourFrames.length>=4) {
-            // if (this.frame%4==0) {
-                this.lastFourFrames.shift()
-                this.lastFourFrames.push(JSON.parse(JSON.stringify(board))) 
-            // }
-            this.frame++
+        // if (this.lastFourFrames.length>=4) {
+        //     // if (this.frame%4==0) {
+        //         this.lastFourFrames.shift()
+        //         this.lastFourFrames.push(JSON.parse(JSON.stringify(board))) 
+        //     // }
+        //     this.frame++
           
-            this.getAIMove()
-        } else {
-            this.lastFourFrames.push(JSON.parse(JSON.stringify(board))) 
-        }
+        this.getAIMove()
+        // } else {
+        //     this.lastFourFrames.push(JSON.parse(JSON.stringify(board))) 
+        // }
         this.renderGame()
 
       },
       getAIMove() {
         let payload = {
-            board: this.lastFourFrames,
+            frame: this.board,
         }
         this.$store.dispatch('pingpong/getBestAction', payload).then((action) => {
             // this.board[action[0]][action[1]] = this.currentPlayer;
-            if (action==3 || action==5) {
-                if (this.player_2_position+16+8<194)
-                    this.player_2_position += 8
-            } else if (action==2 || action==4) {
-               
-                if (this.player_2_position-8>34)
-                    this.player_2_position -= 8
+            if (action==3 ) {
+                if (this.player_2_position+16+5<194)
+                    this.player_2_position += 5
+            } else if (action==2) {
+                if (this.player_2_position-5>34)
+                    this.player_2_position -= 5
             }
             
         })
