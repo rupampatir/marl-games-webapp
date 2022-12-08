@@ -6,8 +6,6 @@ import pickle
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-import cv2
-import torch
 import math
 from tensorflow.keras.optimizers import Adam # - Works
 from keras.models import Sequential
