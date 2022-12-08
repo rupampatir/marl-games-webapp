@@ -18,15 +18,15 @@ from django.urls import path
 from mas_backend import views
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path("api/admin/", admin.site.urls),
 
     # path('', views.home, name='home'),
-    path('get_tic_tac_toe_action/', views.get_tic_tac_toe_action, name='get_tic_tac_toe_action'),
-    path('get_pong_action/', views.get_pong_action, name='get_pong_action'),
-    path('get_connect_4_action/', views.get_connect_4_action, name='get_connect_4_action'),
+    path('api/get_tic_tac_toe_action/', views.get_tic_tac_toe_action, name='get_tic_tac_toe_action'),
+    path('api/get_pong_action/', views.get_pong_action, name='get_pong_action'),
+    path('api/get_connect_4_action/', views.get_connect_4_action, name='get_connect_4_action'),
 
-    path('reset_snake_game/', views.reset_snake_game, name='reset_snake_game'),
-    path('get_snake_action/', views.get_snake_action, name='get_snake_action'),
+    path('api/reset_snake_game/', views.reset_snake_game, name='reset_snake_game'),
+    path('api/get_snake_action/', views.get_snake_action, name='get_snake_action'),
 ]
 
 
