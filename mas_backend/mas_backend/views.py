@@ -71,87 +71,6 @@ def get_tic_tac_toe_action(request):
     optimalAction = chooseAction_QTable(np.array(board), start_player)
     return JsonResponse({"action":optimalAction}, safe=False)
 
-
-### PONG
-
-import torch
-import torch.nn as nn
-
-import numpy as np
-
-
-class DQN(nn.Module):
-    def __init__(self, input_shape, n_actions):
-        super(DQN, self).__init__()
-
-        self.conv = nn.Sequential(
-            nn.Conv2d(input_shape[0], 32, kernel_size=8, stride=4),
-            nn.ReLU(),
-            nn.Conv2d(32, 64, kernel_size=4, stride=2),
-            nn.ReLU(),
-            nn.Conv2d(64, 64, kernel_size=3, stride=1),
-            nn.ReLU()
-        )
-
-        conv_out_size = self._get_conv_out(input_shape)
-        self.fc = nn.Sequential(
-            nn.Linear(conv_out_size, 512),
-            nn.ReLU(),
-            nn.Linear(512, n_actions)
-        )
-
-    def _get_conv_out(self, shape):
-        o = self.conv(torch.zeros(1, *shape))
-        return int(np.prod(o.size()))
-
-    def forward(self, x):
-        conv_out = self.conv(x).view(x.size()[0], -1)
-        return self.fc(conv_out)
-
-# PING PONG
-# net = DQN((4,84,84), 6).to("cpu")
-# DEFAULT_ENV_NAME = "./PongNoFrameskip-v4"
-# net.load_state_dict(torch.load(os.path.join(os.path.dirname(os.path.realpath(__file__)), DEFAULT_ENV_NAME + "-best.dat"), map_location=torch.device('cpu')))
-
-
-def process_pong_frame(observations):
-
-    resized_obs = []
-    # Resize image
-    for frame in observations:
-        img = np.reshape(frame, frame.shape).astype(np.float32)
-        img = img[:, :, 0] * 0.299 + img[:, :, 1] * 0.587 + img[:, :, 2] * 0.114
-        resized_screen = cv2.resize(img, (84, 110), interpolation=cv2.INTER_AREA)
-        x_t = resized_screen[18:102, :]
-
-        x_t = np.reshape(x_t, [84, 84])
-        resized_obs.append(x_t.astype(np.uint8))
-
-    resized_obs = np.array(resized_obs)
-    # Move channel to front
-    # moved_axis_observation =  np.moveaxis(resized_obs, 2, 1)
-    
-    final_observatiom = np.array(resized_obs).astype(np.float32) / 255.0
-
-    return final_observatiom
-
-def chooseActionPong(frames):
-    frames = process_pong_frame(frames)
-    state_a = np.array([frames], copy=False)
-    state_v = torch.tensor(state_a, dtype=torch.float).to("cpu")
-    q_vals_v = net(state_v)
-    _, act_v = torch.max(q_vals_v, dim=1)
-    action = int(act_v.item())
-    return action
-
-# our result page view
-@csrf_exempt
-def get_pong_action(request):
-    data = json.loads(request.body)
-    board = data['board']
-    optimalAction = chooseActionPong(np.array(board))
-    return JsonResponse({"action":optimalAction}, safe=False)
-    
 ### CONNECT 4
 
 ROW_COUNT = 6
@@ -332,6 +251,86 @@ def get_connect_4_action(request):
 
         return JsonResponse({"action":optimalAction,"winner":winner}, safe=False)
 
+
+# import numpy as np
+# import pickle
+# import time
+
+# # weights initialization
+# previously_processed_frame = None
+# pong_weights = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'nn_weights.pkl')
+# pong_weights = pickle.load(open(pong_weights, "rb"))
+
+# def sigmoid(x):
+#     return 1.0 / (1.0 + np.exp(-x)) # sigmoid "squashing" function to interval [0,1]
+# from PIL import Image
+
+# def process_frame(frame, previously_processed_frame):
+#     # crop
+#     processed_frame = frame[35:195]
+#     # reduce image size
+#     processed_frame = processed_frame[::2, ::2, :]
+#     # remove color
+#     processed_frame = processed_frame[:, :, 0]
+#     # remove background
+#     processed_frame[processed_frame == 144] = 0
+#     processed_frame[processed_frame == 109] = 0
+#     # set everything that's not black to white
+#     processed_frame[processed_frame != 0] = 1
+#     # print(processed_frame)
+#     # im = Image.fromarray(np.array(processed_frame.astype(np.uint8)))
+#     # im.save("image.jpeg")
+#     # flatten frame
+#     processed_frame = processed_frame.astype(np.float).ravel()
+    
+#     # flatten frame
+#     # subtract the previous frame from the current one so we are only processing
+#     # on changes in the game
+#     if previously_processed_frame is not None:
+#       delta_frame = processed_frame - previously_processed_frame
+#     else:
+#       # the below flattens a frame of 0s
+#       delta_frame = np.zeros(processed_frame.size)
+#     # store the previous frame so we can subtract from it next time
+#     previously_processed_frame = processed_frame
+#     return delta_frame, previously_processed_frame
+
+# def forward(frame):
+#     hidden_layer = np.dot(pong_weights['W1'], frame)
+#     hidden_layer[hidden_layer < 0] = 0 # ReLU nonlinearity
+#     yhat = np.dot(pong_weights['W2'], hidden_layer)
+#     up_probability = sigmoid(yhat)
+#     return hidden_layer, up_probability # return probability of taking action 2, and hidden state
+
+# def choose_action(probability):
+#     """ this is the stochastic part of RL and what makes this policy
+#     neural network different from a supervised learning problem """
+#     random_value = np.random.uniform()
+#     if random_value < probability:
+#       # signifies up in openai gym
+#       return 2
+#     else:
+#        # signifies down in openai gym
+#       return 3
+
+@csrf_exempt
+def get_pong_action(request):
+    pass
+#     global previously_processed_frame
+#     data = json.loads(request.body)
+#     current_frame = np.array(data['frame'])
+#     delta_frame, previously_processed_frame = process_frame(current_frame, previously_processed_frame)
+#     # forward the policy network and sample an action from the returned probability
+#     hidden_layer, up_probability = forward(delta_frame)
+#     optimalAction = choose_action(up_probability)
+#     return JsonResponse({"action":optimalAction}, safe=False)
+    
+
+
+
+
+
+
 ### Snake
 
 import numpy as np
@@ -502,17 +501,16 @@ class Game:
     def get_board_state(self):
         board = [[0 for i in range(20)] for j in range(20)]
         for player in self.player:
-            print(player.position)
             for x, y  in player.position:
-                print(x,y)
                 x = int(x/20)
                 y = int(y/20)
-                board[x][y] = player.player_number
-        print(self.food)
+                if (x<len(board) and y<len(board[0])):
+                    board[x][y] = player.player_number
         for food in self.food:
             x = int(food.x_food/20)
             y = int(food.y_food/20)
-            board[x][y] = -1
+            if (x<len(board) and y<len(board[0])):
+              board[x][y] = -1
         
         return board
 
@@ -618,7 +616,6 @@ def reset_snake_game(request):
     snake_red = Player(snake_game, "red")
     snake_game.player.append(snake_red)
     snake_game.food.append(Food(snake_game))
-	# snake_game.
     snake_game.game_speed = 0
 
     return JsonResponse({"board":snake_game.get_board_state(), "scores": snake_game.get_player_scores() }, safe=False) 
@@ -637,7 +634,7 @@ def get_snake_action(request):
             ai_move = player.select_move(snake_game)
             player.do_move(ai_move, snake_game)
         if player.crash:
-            player.init_player(snake_game)
+            player.init_player(snake_game)            
 
     return JsonResponse({"board":snake_game.get_board_state(), "scores": snake_game.get_player_scores() }, safe=False)
     

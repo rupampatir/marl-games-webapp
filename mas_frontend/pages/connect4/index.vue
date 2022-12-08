@@ -7,15 +7,14 @@
 
     </v-card>
 
-    <v-card flat class="my-5 mx-auto">
+    <v-card flat class="board my-5 mx-auto">
       <v-layout ma-n1 pa-0 v-for="(n, i) in 6" :key="i">
         <v-layout v-for="(n, j) in 7" :key="`${i}${j}`">
           <v-layout  
             @mouseover="onMouseHover(j)"
             @mouseleave="onMouseHover(-1)" 
-            @click="performMove(j)" :class="`cell ma-1 ${hover==j?'hover':''}`">
-            <div :class="`${board[5-i][j] == -1 ? 'cross' : ''} ${board[5-i][j] == 1 ? 'dot' : ''}`"
-              v-if="board[5-i][j] !== 0">
+            @click="performMove(j)" :class="`cell ${hover==j?'hover':''}`">
+            <div :class="`${board[5-i][j] == 0 ? 'white-chip' : ''} ${board[5-i][j] == -1 ? 'blue-chip' : ''} ${board[5-i][j] == 1 ? 'red-chip' : ''}`">
             </div>
           </v-layout>
           <br>
@@ -75,11 +74,8 @@ export default {
       if (this.currentPlayer==this.PLAYER_PIECE && this.is_valid_location(col)) this.hover = col
     },
     resetGame() {
-
-
-WINDOW_LENGTH = 4
       this.board = [
-      [0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0],
@@ -147,64 +143,69 @@ WINDOW_LENGTH = 4
 
 <style scoped>
 .game-window {
-  max-width: 35vw;
+  max-width: 40vw;
   margin: 0 auto;
   padding-top: 20px;
-  
 
 }
 
+.board {
+  background-color: white;
+  padding: 10px;
+}
+
 .cell {
-  padding-bottom: 100%;
+  height: 80px;
+
+  width: 80px;
+  margin:4px;
+  padding:2px;
+
   cursor: pointer;
   /* width:1000px; */
   position: relative;
   border: solid 3px #1F1F1F;
   border-radius: 5px;
-  background-color: #FFFF8F;
+  background-color: #005f1e;
   -webkit-transition: 0.2s;
           transition: 0.2s;
 }
 
 .cell.hover {
-  -webkit-transform: scale(1.1);
-          transform: scale(1.1);
-}
+  background-color: #ffae00;
 
-.cross {
-  /* background: teal; */
-  width: 80%;
-  height: 80%;
-  position: absolute;
+  -webkit-transform: scale(1.01);
+          transform: scale(1.01);
+}
+.blue-chip {
+  height: 50px;
+  width: 50px;
+  border: solid black 2px;
+  background-color: rgb(21, 0, 181);
+  border-radius: 50%;
   top: 10%;
-  left: 40%;
+  left: 10%;
+  display: inline-block;
+  z-index: 3;
 }
 
-.cross:after {
-  content: '';
-  height: 100%;
-  border-left: 16px solid #76C49C;
-  position: absolute;
-  transform: rotate(45deg);
-  /* left: 10%;
-      top:10%; */
+.red-chip {
+  height: 50px;
+  width: 50px;
+  border: solid black 2px;
+  background-color: rgb(181, 0, 0);
+  border-radius: 50%;
+  top: 10%;
+  left: 10%;
+  display: inline-block;
+  z-index: 3;
 }
 
-.cross:before {
-  content: '';
-  height: 100%;
-  border-left: 16px solid #76C49C;
-  position: absolute;
-  transform: rotate(-45deg);
-  /* top:10%;
-      left: 10%; */
-}
-
-.dot {
-  position: absolute;
-  height: 80%;
-  width: 80%;
-  border: solid #89CFF0 16px;
+.white-chip {
+  height: 50px;
+  width: 50px;
+  border: solid black 2px;
+  background-color: white;
   border-radius: 50%;
   top: 10%;
   left: 10%;

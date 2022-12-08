@@ -2,19 +2,26 @@
     <div class="tictactoe-board game-window">
       <v-card class="pa-6" color="secondary" width="100%">
         <v-layout column justify-center align-center>
-          <h2 class="white--text"> Max Score: {{ scores }}  </h2>
+          <h2 class="white--text">  Score   </h2>
+          <v-layout :style="`width:100%;`" justify-space-around>
+            <h1 :style="`color: rgb(21, 0, 181);`"> YOU: {{ scores[1] }}</h1>
+            <h1 :style="`color: rgb(181, 0, 0);`"> {{ scores[0] }} :AI</h1>
+
+          </v-layout>
+
         </v-layout>
         <v-btn color="black" block @click="startGame">
               Start/Restart
         </v-btn>
       </v-card>
   
-      <v-card flat class="my-5 mx-auto">
-        <v-layout ma-n1 pa-0 v-for="(n, i) in 20" :key="i">
-          <v-layout v-for="(n, j) in 20" :key="`${i}${j}`">
-              <div :class="`cell ${board[i][j] == 1 ? 'blue' : ''} ${board[i][j] == 2 ? 'red' : ''} ${board[i][j] == -1 ? 'food' : ''}`">
+      <v-card flat class="snakeborder my-5 mx-auto">
+        <v-layout pa-0 v-for="(n, i) in 20" :key="i">
+          <div justify-center class="backface" v-for="(n, j) in 20" :key="`${i}${j}`">
+              <div :class="`snake-cell  ${board[i][j] == 1 ? 'blue_snake' : ''} ${board[i][j] == 2 ? 'red_snake' : ''} ${board[i][j] == -1 ? 'food' : ''}`">
+            <!-- {{board[i][j]}} -->
               </div>
-          </v-layout>
+          </div>
         </v-layout>
       </v-card>
   
@@ -74,7 +81,7 @@
             self.lastMovePerformed = 3
 
             }
-            console.log(self.lastMovePerformed)
+            // console.log(self.lastMovePerformed)
 
         }
         document.onkeydown = checkKey;
@@ -108,32 +115,47 @@
   
   <style scoped>
   .game-window {
-    max-width: 35vw;
+    /* max-width: 35vw; */
     margin: 0 auto;
     padding-top: 20px;
     
   
   }
   
-  .cell {
-    height: 30px;
-    width: 30px;
-    border: solid 1px #1F1F1F;
+  .snakeborder {
+    width: fit-content;
+    border: solid 14px grey !important;
     background-color: #FFFF8F;
-    -webkit-transition: 0.2s;
-            transition: 0.2s;
   }
   
-  .cell.red {
-    background-color: red;
+  .snake-cell {
+    
+    height: 20px;
+    width: 20px;
+    /* border: solid 1px #1F1F1F; */
+    background-color: #FFFF8F;
+
+    
+    /* opacity: 0.3; */
+    -webkit-transition: 0.01s;
+            transition: 0.01s;
   }
   
-  .cell.blue {
-    background-color: blue;
+  .snake-cell.red_snake {
+    border: solid 2px black;
+    border-radius: 50%;
+    background-color: rgb(181, 0, 0);
+  }
+  
+  .snake-cell.blue_snake {
+    border: solid 2px black;
+    border-radius: 50%;    
+    background-color: rgb(21, 0, 181);
   }
 
-  .cell.food {
-    background-color: black;
+  .snake-cell.food {
+    background-image: url('/food.png');
+
   }
   
   @media screen and (max-width: 600px) {
