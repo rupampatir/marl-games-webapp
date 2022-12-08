@@ -362,6 +362,14 @@ class Player(object):
             x = 0.3 * game.game_width
             y = 0.7 * game.game_height
             self.player_number = 2
+        if self.color == "purple":
+            x = 0.7 * game.game_width
+            y = 0.3 * game.game_height
+            self.player_number = 3
+        if self.color == "green":
+            x = 0.7 * game.game_width
+            y = 0.7 * game.game_height
+            self.player_number = 4
         self.x = x - x % 20
         self.y = y - y % 20
         self.position = []  # coordinates of all the parts of the snake
@@ -610,20 +618,22 @@ snake_game = None
 def reset_snake_game(request):
     global snake_game
     snake_game = Game(20, 20)
-    snake_blu = Player(snake_game, "blue")
     policy_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'SNAKE_300.hdf5')
-    rl_agent = DQNAgent(policy_path)
-    snake_blu.set_agent(rl_agent)
-    snake_game.player.append(snake_blu)
 
     snake_red = Player(snake_game, "red")
     snake_game.player.append(snake_red)
 
     data = json.loads(request.body)
     num_food = data['num_food']
+    num_opponents = data['num_opponents']
+    ai_colors = ["green", "purple", "blue"]
+    for _ in range(num_opponents):
+        snake_ai = Player(snake_game, ai_colors.pop())
+        snake_ai.set_agent(DQNAgent(policy_path))
+        snake_game.player.append(snake_ai)
     for _ in range(num_food):
         snake_game.food.append(Food(snake_game))
-    
+    print(snake_game.player)
     snake_game.game_speed = 0
 
     return JsonResponse({"board":snake_game.get_board_state(), "scores": snake_game.get_player_scores() }, safe=False) 
