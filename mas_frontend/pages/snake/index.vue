@@ -4,9 +4,9 @@
         <v-flex xs9>
           <v-layout column justify-center align-center>
             <h1 class="black--text">  SCORE   </h1>
-            <v-layout :style="`width:100%;`" justify-space-around>
-              <h1 :style="`color: rgb(21, 0, 181);`"> You: {{ scores[1] }}</h1>
-              <h1 :style="`color: rgb(181, 0, 0);`"> {{ scores[0] }} :AI</h1>
+            <v-layout column :style="`width:100%;`" align-start>
+              <h1 :style="`color: rgb(21, 0, 181);`"> You: {{ scores[0]?scores[0]:0 }}</h1>
+              <h1 v-for="(n,i) in selectedNumberOfOpponents" :key="`opponent${i}`" :style="`color: ${color_mapping[i+2]};`"> AI {{i+1}}: {{ scores[i+1] ? scores[i+1] : 0 }}</h1>
             </v-layout>
           </v-layout>
         </v-flex>
@@ -33,6 +33,19 @@
                 class="mt-2" 
                 item-color="white"
                 color="white"
+                v-model="selectedNumberOfOpponents"
+                :hint="`Number of opponents`"
+                :items="[1,2,3]"
+                persistent-hint
+                outlined
+                dense
+                label="Number of opponents"
+                single-line
+              ></v-select>
+            <v-select
+                class="mt-2" 
+                item-color="white"
+                color="white"
                 v-model="selectedNumberOfFood"
                 :hint="`Number of apples`"
                 :items="[1,2,3,4]"
@@ -49,10 +62,11 @@
   
       <v-card flat class="snakeborder my-5 mx-auto">
         <v-layout pa-0 v-for="(n, i) in 20" :key="i">
-          <div justify-center class="backface" v-for="(n, j) in 20" :key="`${i}${j}`">
-              <div :class="`snake-cell  ${board[i][j] == 1 ? 'blue_snake' : ''} ${board[i][j] == 2 ? 'red_snake' : ''} ${board[i][j] == -1 ? 'food' : ''}`">
+          <div justify-center v-for="(n, j) in 20" :key="`${i}${j}`">
+              <div v-if="board[i][j]==-1" class="snake_cell food" > </div>
+              <div v-else-if="(board[i][j]!=0)" class="snake_cell player" :style="`background-color: ${color_mapping[board[i][j]]};`"></div>
+              <div v-else class="snake_cell"></div>
             <!-- {{board[i][j]}} -->
-              </div>
           </div>
         </v-layout>
       </v-card>
@@ -65,13 +79,20 @@
   export default {
     data() {
       return {
+        color_mapping: {
+          1: "rgb(21, 0, 181)",
+          2: "rgb(181, 0, 0)",
+          3: "rgb(0, 126, 19);",
+          4: "rgb(238, 0, 255)"
+        },
         hover: -1,
         board: [],
         scores: 0,
         pause: true,
         started: false,
         lastMovePerformed: 3,
-        selectedNumberOfFood: 1
+        selectedNumberOfFood: 1,
+        selectedNumberOfOpponents: 1
       }
     },
     computed: {
@@ -131,7 +152,8 @@
         this.started = true
         this.paused = false
         let payload = {
-            "num_food": this.selectedNumberOfFood
+            "num_food": this.selectedNumberOfFood,
+            "num_opponents": this.selectedNumberOfOpponents
         }
         this.$store.dispatch('snake/resetGame', payload).then((res) => {
             this.board = res.board
@@ -182,32 +204,25 @@
     background-color: #FFFF8F;
   }
   
-  .snake-cell {
+  .snake_cell {
     
     height: 20px;
     width: 20px;
-    /* border: solid 1px #1F1F1F; */
+    /* border: solid 1px #FFFF8F; */
     background-color: #FFFF8F;
-
+  
     
     /* opacity: 0.3; */
     -webkit-transition: 0.01s;
             transition: 0.01s;
   }
-  
-  .snake-cell.red_snake {
+
+  .snake_cell.player {
     border: solid 2px black;
-    border-radius: 50%;
-    background-color: rgb(181, 0, 0);
-  }
-  
-  .snake-cell.blue_snake {
-    border: solid 2px black;
-    border-radius: 50%;    
-    background-color: rgb(21, 0, 181);
+    border-radius: 50%;   
   }
 
-  .snake-cell.food {
+  .snake_cell.food {
     background-image: url('/food.png');
 
   }

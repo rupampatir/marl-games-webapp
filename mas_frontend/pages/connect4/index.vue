@@ -64,7 +64,7 @@ export default {
   },
   computed: {
     humans_turn() {
-      return (this.start_player == 2 && this.currentPlayer == -1) || (this.start_player == 1 && this.currentPlayer == 1)
+      return this.currentPlayer == this.PLAYER_PIECE
     },
   },
   mounted() {
